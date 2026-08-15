@@ -1,0 +1,27 @@
+{
+  "name": "backend-exercise-odometer",
+  "version": "1.0.0",
+  "description": "Extracts mileage data from odometer images",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/just-insure/backend-exercise-odometer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/just-insure/backend-exercise-odometer/issues"
+  },
+  "homepage": "https://github.com/just-insure/backend-exercise-odometer#readme",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2"
+  },
+  "type": "module"
+}
