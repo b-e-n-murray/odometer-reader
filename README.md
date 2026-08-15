@@ -37,12 +37,20 @@ The server will be available at: http://localhost:3000/
 
 ## Further considerations
 - File size
-  - The project currently supports files of up to ..., due to the capabilities of ... To support a wider range of customers, with differing camera-qualities, we might consider improving this by ...
+  - A tentative upper bound is in place for now. The right limit is really
+    a resolution question — odometer digits need to be legible to the OCR
+    engine — so this will likely need revisiting once we have real
+    accuracy data at different resolutions/file sizes.
 
 - Support for other distance measurements
-  - Are there any states/countries which use km? We may need to extend this in future to support more users.
+  - The majority of cars in the UK/US use miles, so this is the initial
+    assumption. Expanding to km-based odometers may be difficult, since
+    not all odometers display their unit (mi/km) on the display itself —
+    detecting this reliably from the image alone is an open problem.
 
 - Confidence calculation
-  - ...
+  - Based on the OCR engine's (Tesseract.js) per-word confidence score,
+    supplemented with domain-specific checks (e.g. plausible digit count/
+    format for an odometer reading).
 
 - HTTP vs HTTPS?
