@@ -4,6 +4,7 @@ import type { ErrorCode } from "./utils/errors.js";
 import { STATUS_BY_CODE } from "./utils/errors.js";
 import { extractImage } from "./services/extract.js";
 import { validateImage } from "./services/validate-content.js";
+import { extractOdometer } from "./services/tesseract.js";
 
 const ODOMETER_READING_PATH = "/odometer/reading";
 
@@ -48,8 +49,17 @@ export const app = http.createServer(async (req, res) => {
     return;
   }
 
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Hello Odometer enthusiast!\n");
+  const odometer = await extractOdometer(extraction.data);
+  if (!odometer.ok) {
+    sendErrorResponse(res, odometer.code, odometer.message);
+    return;
+  }
+
+  sendResponse(res, 200, {
+    reading: odometer.reading,
+    unit: "miles", // Should be extended for other units in future.
+    confidence: odometer.confidence,
+  });
 });
 
 function handleMethodAndPathValidation(

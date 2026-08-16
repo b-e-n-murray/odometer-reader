@@ -31,6 +31,11 @@ npm start
 ```
 
 The server will be available at: http://localhost:3000/
+
+> **Note:** the first request (or first test run) downloads the Tesseract
+> English language data and caches it in `.tesseract-cache/`, so it needs
+> network access once. Every run after that works offline.
+
 #### Example request
 
 ```sh
@@ -64,4 +69,31 @@ npm test
     supplemented with domain-specific checks (e.g. plausible digit count/
     format for an odometer reading).
 
+- OCR accuracy
+  - Against the four sample photographs, the service currently reads 2 of 4
+    correctly. The two failures are instructive rather than incidental:
+    - **Seven-segment LCDs.** Tesseract's `eng` model is trained on printed
+      prose and misreads segmented glyphs — one sample reads `55528` instead
+      of `161967` even from a tight, high-resolution crop, so this is not a
+      preprocessing problem. A segment-trained model (e.g. `letsgodigital`)
+      or a cloud OCR engine would be the fix.
+    - **Out-of-focus photographs.** No amount of scaling or thresholding
+      recovers digits that were never resolved by the camera. Guidance at
+      the point of capture would be more effective than processing.
+  - Both cases are covered by skipped tests naming the limitation, so they
+    become live the moment the engine improves.
+
+- OCR performance
+  - Recognition is CPU-bound and runs two passes per image (full frame plus a
+    central band), taking roughly 2–7 seconds per request. A single Node
+    process will serialise on this, so a worker pool or a queue-backed worker
+    service is the obvious next step if throughput matters.
+
 - HTTP vs HTTPS?
+
+## Future improvements
+
+- Accuracy
+  - Replace Tesseract?
+- Speed
+- Extend to handle other units of distance

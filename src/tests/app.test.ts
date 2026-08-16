@@ -5,9 +5,30 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { AddressInfo } from "node:net";
 import { app } from "../app.js";
+import { terminateOcr } from "../services/tesseract.js";
 
 const FIXTURE_IMAGE = "33c24909-e9dd-46d3-8e7f-c44fd9896537.jpeg";
-const SUCCESS_BODY = "Hello Odometer enthusiast!\n";
+const CONFIDENCE_LEVELS = ["high", "medium", "low"];
+
+/**
+ * Asserts the documented success shape. The reading itself is not pinned here -
+ * OCR accuracy is measured in tesseract.test.ts, this covers the wiring.
+ */
+async function assertReadingResponse(res: Response) {
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("content-type"), "application/json");
+
+  const body = await res.json();
+  // Not asserted as a whole number: displays showing a tenth are reported as
+  // such, so a reading may legitimately be fractional.
+  assert.equal(typeof body.reading, "number");
+  assert.ok(body.reading > 0, "reading should be positive");
+  assert.equal(body.unit, "miles");
+  assert.ok(
+    CONFIDENCE_LEVELS.includes(body.confidence),
+    `unexpected confidence: ${body.confidence}`,
+  );
+}
 
 let baseUrl: string;
 let odometerUrl: string;
@@ -32,6 +53,9 @@ before(async () => {
 after(async () => {
   app.close();
   await once(app, "close");
+
+  // The OCR worker runs on its own thread and would keep the process alive.
+  await terminateOcr();
 });
 
 function multipartBody(fieldName: string, data: Buffer, filename: string) {
@@ -92,8 +116,7 @@ describe("POST /odometer/reading", () => {
         body: multipartBody("image", fixture, FIXTURE_IMAGE),
       });
 
-      assert.equal(res.status, 200);
-      assert.equal(await res.text(), SUCCESS_BODY);
+      await assertReadingResponse(res);
     });
 
     it("returns 400 when the upload has no parts at all", async () => {
@@ -144,8 +167,7 @@ describe("POST /odometer/reading", () => {
         jsonBody(fixture.toString("base64")),
       );
 
-      assert.equal(res.status, 200);
-      assert.equal(await res.text(), SUCCESS_BODY);
+      await assertReadingResponse(res);
     });
 
     it("returns 200 for a valid data URI prefixed image", async () => {
@@ -154,8 +176,7 @@ describe("POST /odometer/reading", () => {
         jsonBody(`data:image/jpeg;base64,${fixture.toString("base64")}`),
       );
 
-      assert.equal(res.status, 200);
-      assert.equal(await res.text(), SUCCESS_BODY);
+      await assertReadingResponse(res);
     });
 
     it("returns 400 when the image field is absent", async () => {
