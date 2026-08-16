@@ -4,7 +4,7 @@
   "description": "Extracts mileage data from odometer images",
   "main": "index.js",
   "scripts": {
-    "test": "tsc && node --test \"dist/tests/**/*.test.js\"",
+    "test": "rm -rf dist && tsc && node --test \"dist/tests/**/*.test.js\"",
     "build": "tsc",
     "start": "node dist/server.js",
     "format": "prettier . --write"

@@ -30,7 +30,7 @@ function extractFromMultipart(
     });
 
     let settled = false;
-    let imageFound = false;
+    let imageData: Buffer | null = null;
 
     const settle = (result: ExtractionResult) => {
       if (settled) return;
@@ -38,27 +38,43 @@ function extractFromMultipart(
       resolve(result);
     };
 
+    const reject = (message: string) => {
+      settle({ ok: false, code: "INVALID_INPUT", message });
+    };
+
     busboy.on("file", (fieldName, file) => {
-      if (fieldName !== IMAGE_FIELD_NAME || imageFound) {
-        file.resume(); // must drain every file stream, even ones we discard
+      file.resume(); // every file stream must be drained, even rejected ones
+
+      if (fieldName !== IMAGE_FIELD_NAME) {
+        reject(
+          `Unexpected file field "${fieldName}": only "${IMAGE_FIELD_NAME}" is accepted`,
+        );
         return;
       }
-      imageFound = true;
 
       const chunks: Buffer[] = [];
       file.on("data", (chunk: Buffer) => chunks.push(chunk));
 
       file.on("close", () => {
         if (file.truncated) {
-          settle({
-            ok: false,
-            code: "INVALID_INPUT",
-            message: `Image exceeds maximum file size of ${MAX_FILE_SIZE} bytes`,
-          });
+          reject(`Image exceeds maximum file size of ${MAX_FILE_SIZE} bytes`);
           return;
         }
-        settle({ ok: true, data: Buffer.concat(chunks) });
+        // Held back rather than resolved here, so that a trailing part can
+        // still cause the request to be rejected.
+        imageData = Buffer.concat(chunks);
       });
+    });
+
+    busboy.on("field", (fieldName) => {
+      reject(
+        `Unexpected field "${fieldName}": only an "${IMAGE_FIELD_NAME}" file is accepted`,
+      );
+    });
+
+    // Fires when a second file is encountered, given the limit of 1 above.
+    busboy.on("filesLimit", () => {
+      reject("Only one file may be uploaded per request");
     });
 
     busboy.on("error", (err) => {
@@ -70,13 +86,17 @@ function extractFromMultipart(
     });
 
     busboy.on("close", () => {
-      if (!imageFound) {
-        settle({
-          ok: false,
-          code: "MISSING_IMAGE",
-          message: `No file found in "${IMAGE_FIELD_NAME}" field`,
-        });
+      if (imageData && imageData.byteLength > 0) {
+        settle({ ok: true, data: imageData });
+        return;
       }
+      settle({
+        ok: false,
+        code: "MISSING_IMAGE",
+        message: imageData
+          ? `"${IMAGE_FIELD_NAME}" field was empty`
+          : `No file found in "${IMAGE_FIELD_NAME}" field`,
+      });
     });
 
     req.on("error", () => {
@@ -118,6 +138,18 @@ async function extractFromJson(
       ok: false,
       code: "MISSING_IMAGE",
       message: `Request body must include a base64-encoded "${IMAGE_FIELD_NAME}" field`,
+    };
+  }
+
+  const unexpectedFields = Object.keys(parsed as Record<string, unknown>).filter(
+    (key) => key !== IMAGE_FIELD_NAME,
+  );
+
+  if (unexpectedFields.length > 0) {
+    return {
+      ok: false,
+      code: "INVALID_INPUT",
+      message: `Unexpected field(s) ${unexpectedFields.map((field) => `"${field}"`).join(", ")}: only "${IMAGE_FIELD_NAME}" is accepted`,
     };
   }
 

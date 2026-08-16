@@ -96,14 +96,34 @@ describe("POST /odometer/reading", () => {
       assert.equal(await res.text(), SUCCESS_BODY);
     });
 
-    it("returns 400 when the image field is absent", async () => {
+    it("returns 400 when the upload has no parts at all", async () => {
+      const res = await fetch(odometerUrl, {
+        method: "POST",
+        body: new FormData(),
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal((await res.json()).error, "MISSING_IMAGE");
+    });
+
+    it("returns 400 when the image file is empty", async () => {
+      const res = await fetch(odometerUrl, {
+        method: "POST",
+        body: multipartBody("image", Buffer.alloc(0), FIXTURE_IMAGE),
+      });
+
+      assert.equal(res.status, 400);
+      assert.equal((await res.json()).error, "MISSING_IMAGE");
+    });
+
+    it("returns 400 when the file uses a different field name", async () => {
       const res = await fetch(odometerUrl, {
         method: "POST",
         body: multipartBody("odometer", fixture, FIXTURE_IMAGE),
       });
 
       assert.equal(res.status, 400);
-      assert.equal((await res.json()).error, "MISSING_IMAGE");
+      assert.equal((await res.json()).error, "INVALID_INPUT");
     });
 
     it("returns 422 for an undecodable image", async () => {
