@@ -1,5 +1,7 @@
 # Odometer Reading Service — Project Plan
 
+Created early in project to document requirements and initial approach.
+
 ## Requirements
 
 - Accept image uploads via:

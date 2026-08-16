@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/just-insure/backend-exercise-odometer.git"
+    "url": "git+https://github.com/b-e-n-murray/odometer-reader.git"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/just-insure/backend-exercise-odometer/issues"
   },
-  "homepage": "https://github.com/just-insure/backend-exercise-odometer#readme",
+  "homepage": "https://github.com/b-e-n-murray/odometer-reader#readme",
   "devDependencies": {
     "@types/busboy": "^1.5.4",
     "@types/node": "^26.2.0",
@@ -27,6 +27,9 @@
     "typescript": "^7.0.2"
   },
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "busboy": "^1.6.0",
     "sharp": "^0.35.3",
