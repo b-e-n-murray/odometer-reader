@@ -68,18 +68,16 @@ function handleMethodAndPathValidation(
   res: http.ServerResponse,
 ): boolean {
   if (path !== ODOMETER_READING_PATH) {
-    sendResponse(res, 404, {
-      error: "NOT_FOUND",
-      message: `Request path ${path} not recognised`,
-    });
+    sendErrorResponse(res, "NOT_FOUND", `Request path ${path} not recognised`);
     return false;
   }
 
   if (method !== "POST") {
-    sendResponse(res, 405, {
-      error: "METHOD_NOT_ALLOWED",
-      message: `Expected POST for ${path} path, got ${method}`,
-    });
+    sendErrorResponse(
+      res,
+      "METHOD_NOT_ALLOWED",
+      `Expected POST for ${path} path, got ${method}`,
+    );
     return false;
   }
 

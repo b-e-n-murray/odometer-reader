@@ -1,5 +1,7 @@
 export type ErrorCode =
   | "MISSING_IMAGE"
+  | "NOT_FOUND"
+  | "METHOD_NOT_ALLOWED"
   | "UNSUPPORTED_FILE_TYPE"
   | "UNREADABLE_IMAGE"
   | "INVALID_INPUT"
@@ -7,6 +9,8 @@ export type ErrorCode =
 
 export const STATUS_BY_CODE: Record<ErrorCode, number> = {
   MISSING_IMAGE: 400,
+  NOT_FOUND: 404,
+  METHOD_NOT_ALLOWED: 405,
   UNSUPPORTED_FILE_TYPE: 415,
   UNREADABLE_IMAGE: 422,
   INVALID_INPUT: 400,
