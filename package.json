@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "format": "prettier . --write"
   },
   "repository": {
     "type": "git",
@@ -20,8 +21,14 @@
   },
   "homepage": "https://github.com/just-insure/backend-exercise-odometer#readme",
   "devDependencies": {
+    "@types/busboy": "^1.5.4",
     "@types/node": "^26.2.0",
+    "prettier": "3.9.6",
     "typescript": "^7.0.2"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "busboy": "^1.6.0",
+    "sharp": "^0.35.3"
+  }
 }

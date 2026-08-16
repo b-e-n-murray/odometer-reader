@@ -2,6 +2,9 @@ import http from "node:http";
 import { URL } from "node:url";
 import type { ErrorCode } from "./utils/errors.js";
 import { STATUS_BY_CODE } from "./utils/errors.js";
+import { extractImage } from "./services/extract.js";
+import { validateImage } from "./services/validate-content.js";
+
 function sendResponse(res: http.ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(JSON.stringify(body));
@@ -30,6 +33,19 @@ const server = http.createServer(async (req, res) => {
   if (!validContent) {
     return;
   }
+
+  const extraction = await extractImage(req, contentType);
+  if (!extraction.ok) {
+    sendErrorResponse(res, extraction.code, extraction.message);
+    return;
+  }
+
+  const validation = await validateImage(extraction.data);
+  if (!validation.valid) {
+    sendErrorResponse(res, validation.code, validation.message);
+    return;
+  }
+
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("Hello Odometer enthusiast!\n");
 });
