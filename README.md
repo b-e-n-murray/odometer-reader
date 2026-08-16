@@ -32,10 +32,16 @@ npm start
 
 The server will be available at: http://localhost:3000/
 
- Running the tests
+### Running the tests
 
+From the root of the project:
+
+```sh
+npm run test
+```
 
 ## Further considerations
+
 - File size
   - A tentative upper bound is in place for now. The right limit is really
     a resolution question — odometer digits need to be legible to the OCR
