@@ -31,13 +31,18 @@ npm start
 ```
 
 The server will be available at: http://localhost:3000/
+#### Example request
+
+```sh
+curl -i -X POST -H "Content-Type: multipart/form-data" -F "image=@images/33c24909-e9dd-46d3-8e7f-c44fd9896537.jpeg" http://localhost:3000/odometer/reading
+```
 
 ### Running the tests
 
 From the root of the project:
 
 ```sh
-npm run test
+npm test
 ```
 
 ## Further considerations
