@@ -1,0 +1,12 @@
+export type ErrorCode =
+  | "MISSING_IMAGE"
+  | "UNSUPPORTED_FILE_TYPE"
+  | "UNREADABLE_IMAGE"
+  | "INVALID_INPUT";
+
+export const STATUS_BY_CODE: Record<ErrorCode, number> = {
+  MISSING_IMAGE: 400,
+  UNSUPPORTED_FILE_TYPE: 415,
+  UNREADABLE_IMAGE: 422,
+  INVALID_INPUT: 400,
+};
